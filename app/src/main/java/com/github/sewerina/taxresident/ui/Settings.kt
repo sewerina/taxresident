@@ -2,8 +2,6 @@ package com.github.sewerina.taxresident.ui
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
@@ -45,7 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,12 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.github.sewerina.taxresident.R
 import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Objects
 
 class SettingsScreenCallbacks(
@@ -109,31 +107,28 @@ fun SettingsScreen(
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                // Для сохранения захвач изображения
-                var capturedImageUri by remember {
-                    mutableStateOf<Uri>(Uri.EMPTY)
+                // Для фиксации захвач изображения
+                var newImageCaptured by remember {
+                    mutableStateOf(false)
                 }
 
                 Box() {
-                    if (capturedImageUri.path?.isNotEmpty() == true) {
+                    if ((file.exists() && file.length() > 0) || newImageCaptured) {
                         Image(
-                            modifier = Modifier.size(96.dp),
-                            painter = rememberAsyncImagePainter(capturedImageUri),
-                            contentDescription = "user avatar"
-                        )
-                    }
-                    else if (file.exists() && file.length() > 0) {
-                        Image(
-                            modifier = Modifier.size(96.dp),
+                            modifier = Modifier
+                                .size(96.dp)
+                                .clip(shape = CircleShape),
+                            contentScale = ContentScale.Crop,
                             painter = rememberAsyncImagePainter(uri),
                             contentDescription = "user avatar"
                         )
-                    }
-                    else {
+                    } else {
                         Icon(
-                            modifier = Modifier.size(96.dp),
+                            modifier = Modifier
+                                .size(96.dp)
+                                .clip(shape = CircleShape),
                             imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "user avatar",
+                            contentDescription = "default user avatar",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -148,7 +143,7 @@ fun SettingsScreen(
                     // Для сохранения захвач изображения
                     val cameraLauncher =
                         rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicture()) {
-                            capturedImageUri = uri
+                            newImageCaptured = true
                         }
 
 
@@ -165,7 +160,7 @@ fun SettingsScreen(
                                 cameraLauncher.launch(uri)
                             }
                         }
-                    SmallEditIconBtn(96) { expandedAvatarMenuState.value = true }
+                    SmallEditIconBtn(120) { expandedAvatarMenuState.value = true }
                     DropdownMenu(
                         expanded = expandedAvatarMenuState.value,
                         offset = DpOffset(96.dp, 0.dp),
@@ -180,7 +175,9 @@ fun SettingsScreen(
                         DropdownMenuItem(text = { Text(stringResource(R.string.menuItem_new_photo)) },
                             onClick = {
                                 expandedAvatarMenuState.value = false
-                                // Todo! - 1) открыть камеру и сделать фото 2) сохранить сделанное фото
+                                // 1) Запросить разрешение на камеру, если нет
+                                // 2) Открыть камеру и сделать фото
+                                // 3) Сохранить сделанное фото в файл в externalCacheDir
 
                                 if (!permissionGranted) {
                                     // ask for permission
@@ -310,10 +307,6 @@ fun Context.createImageFile(): File {
         externalCacheDir, /* directory */
         fileName
     )
-//    if (image.exists()){
-//        image.delete()
-//    }
-//    image.createNewFile()
     return image
 }
 

@@ -9,36 +9,42 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.github.sewerina.taxresident.R
 import kotlinx.coroutines.delay
+import java.util.Objects
 
 @Composable
 private fun SplashScreen(randomDraw: Int, alfa: Float, userName: String) {
     Box(modifier = Modifier.fillMaxSize()) {
+        // Картинка на фоне
         Image(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
             painter = painterResource(id = randomDraw),
             contentDescription = "hello image"
@@ -51,12 +57,31 @@ private fun SplashScreen(randomDraw: Int, alfa: Float, userName: String) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                modifier = Modifier.size(96.dp),
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "logo icon",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            val context = LocalContext.current
+            val file = context.createImageFile()
+            val uri = FileProvider.getUriForFile(
+                Objects.requireNonNull(context), context.packageName + ".provider", file
             )
+            if (file.exists() && file.length() > 0) {
+                Image(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(shape = CircleShape),
+                    contentScale = ContentScale.Crop,
+                    painter = rememberAsyncImagePainter(uri),
+                    contentDescription = "user avatar"
+                )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(shape = CircleShape),
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "logo icon",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
             Text(
                 text = "Приветствуем,\n${userName}!",
                 textAlign = TextAlign.Center,
@@ -80,8 +105,7 @@ fun AnimatedSplashScreen(randomDraw: Int, userName: String, navController: NavHo
     var startAnimation by remember { mutableStateOf(value = false) }
 
     val alfaAnim = animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(durationMillis = 3000)
+        targetValue = if (startAnimation) 1f else 0f, animationSpec = tween(durationMillis = 3000)
     )
 
     LaunchedEffect(key1 = Unit) {
