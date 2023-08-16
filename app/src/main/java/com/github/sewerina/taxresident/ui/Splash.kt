@@ -1,5 +1,7 @@
 package com.github.sewerina.taxresident.ui
 
+import android.graphics.Bitmap
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -18,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,15 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
 import com.github.sewerina.taxresident.R
 import kotlinx.coroutines.delay
-import java.util.Objects
 
 @Composable
-private fun SplashScreen(randomDraw: Int, alfa: Float, userName: String) {
+private fun SplashScreen(randomDraw: Int, alfa: Float, avatarBitmap: Bitmap?, userName: String) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Картинка на фоне
         Image(
@@ -57,18 +59,13 @@ private fun SplashScreen(randomDraw: Int, alfa: Float, userName: String) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val context = LocalContext.current
-            val file = context.createImageFile()
-            val uri = FileProvider.getUriForFile(
-                Objects.requireNonNull(context), context.packageName + ".provider", file
-            )
-            if (file.exists() && file.length() > 0) {
+            if (avatarBitmap != null) {
                 Image(
                     modifier = Modifier
                         .size(96.dp)
                         .clip(shape = CircleShape),
+                    bitmap = avatarBitmap.asImageBitmap(),
                     contentScale = ContentScale.Crop,
-                    painter = rememberAsyncImagePainter(uri),
                     contentDescription = "user avatar"
                 )
             } else {
@@ -97,7 +94,7 @@ private fun SplashScreen(randomDraw: Int, alfa: Float, userName: String) {
 @Preview
 @Composable
 fun PreviewSplashScreen() {
-    SplashScreen(R.drawable.hello_3, 1f, "Аркадий")
+    SplashScreen(R.drawable.hello_3, 1f, null, "Аркадий")
 }
 
 @Composable
@@ -108,11 +105,17 @@ fun AnimatedSplashScreen(randomDraw: Int, userName: String, navController: NavHo
         targetValue = if (startAnimation) 1f else 0f, animationSpec = tween(durationMillis = 3000)
     )
 
+    val avatarViewModel: AvatarViewModel = viewModel(
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    val avatarBitmapState = avatarViewModel.avatarBitmap.observeAsState()
+
     LaunchedEffect(key1 = Unit) {
+        avatarViewModel.loadAvatar()
         startAnimation = true
         delay(4000)
         navController.popBackStack()
         navController.toHome()
     }
-    SplashScreen(randomDraw, alfaAnim.value, userName)
+    SplashScreen(randomDraw, alfaAnim.value, avatarBitmapState.value, userName)
 }

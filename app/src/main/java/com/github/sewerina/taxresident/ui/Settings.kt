@@ -2,6 +2,7 @@ package com.github.sewerina.taxresident.ui
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -39,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -54,12 +57,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.sewerina.taxresident.R
 import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
-import java.io.File
-import java.util.Objects
 
 class SettingsScreenCallbacks(
     val onSwitchTheme: (Boolean) -> Unit,
@@ -73,13 +73,10 @@ class SettingsScreenCallbacks(
 fun SettingsScreen(
     darkTheme: Boolean, callbacks: SettingsScreenCallbacks
 ) {
-    val context = LocalContext.current
-    val file = context.createImageFile()
-    val uri = FileProvider.getUriForFile(
-        Objects.requireNonNull(context),
-        context.packageName + ".provider",
-        file
+    val avatarViewModel: AvatarViewModel = viewModel(
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
+    val avatarBitmapState = avatarViewModel.avatarBitmap.observeAsState()
 
     Scaffold(topBar = {
         TopAppBar(modifier = Modifier.fillMaxWidth(),
@@ -107,19 +104,14 @@ fun SettingsScreen(
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                // Для фиксации захвач изображения
-                var newImageCaptured by remember {
-                    mutableStateOf(false)
-                }
-
                 Box() {
-                    if ((file.exists() && file.length() > 0) || newImageCaptured) {
+                    if (avatarBitmapState.value != null) {
                         Image(
                             modifier = Modifier
                                 .size(96.dp)
                                 .clip(shape = CircleShape),
+                            bitmap = avatarBitmapState.value!!.asImageBitmap(),
                             contentScale = ContentScale.Crop,
-                            painter = rememberAsyncImagePainter(uri),
                             contentDescription = "user avatar"
                         )
                     } else {
@@ -140,13 +132,19 @@ fun SettingsScreen(
                         mutableStateOf(false)
                     }
 
+                    // Для запуска галереи и выбора фото из нее
+                    val galleryLauncher =
+                        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { inputUri ->
+                            avatarViewModel.updateAvatar(inputUri)
+                        }
+
                     // Для сохранения захвач изображения
                     val cameraLauncher =
                         rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicture()) {
-                            newImageCaptured = true
+                            avatarViewModel.loadAvatar()
                         }
 
-
+                    val context = LocalContext.current
                     // Для учета permission на камеру
                     var permissionGranted by remember {
                         mutableStateOf(isPermissionGranted(context))
@@ -157,9 +155,10 @@ fun SettingsScreen(
                             permissionGranted = permissionGranted_
 
                             if (permissionGranted_) {
-                                cameraLauncher.launch(uri)
+                                cameraLauncher.launch(avatarViewModel.avatarUri)
                             }
                         }
+
                     SmallEditIconBtn(120) { expandedAvatarMenuState.value = true }
                     DropdownMenu(
                         expanded = expandedAvatarMenuState.value,
@@ -169,8 +168,7 @@ fun SettingsScreen(
                         DropdownMenuItem(text = { Text(stringResource(R.string.menuItem_photo_fromGallery)) },
                             onClick = {
                                 expandedAvatarMenuState.value = false
-                                // Todo! - 1) перейти в галерею и выбрать фото 2) сохранить выбранное фото
-
+                                galleryLauncher.launch("image/*")
                             })
                         DropdownMenuItem(text = { Text(stringResource(R.string.menuItem_new_photo)) },
                             onClick = {
@@ -183,7 +181,7 @@ fun SettingsScreen(
                                     // ask for permission
                                     permissionLauncher.launch(android.Manifest.permission.CAMERA)
                                 } else {
-                                    cameraLauncher.launch(uri)
+                                    cameraLauncher.launch(avatarViewModel.avatarUri)
                                 }
                             })
                     }
@@ -280,34 +278,8 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
-
-
-//            OutlinedTextField(
-//                modifier = Modifier
-//                    .padding(top = 8.dp, bottom = 8.dp)
-//                    .fillMaxWidth(),
-//                label = { Text(text = "Имя пользователя") },
-//                value = callbacks.onLoadUserName.invoke(),
-//                onValueChange = { callbacks.onSaveUserName.invoke(it) },
-//                readOnly = false,
-//                singleLine = true
-////                interactionSource = departureInteractionSource,
-////                isError = !validDepartureDateState.value,
-////                supportingText = { if (!validDepartureDateState.value) Text(text = stringResource(R.string.supportText_correct_dep_date)) }
-//            )
         }
     }
-}
-
-fun Context.createImageFile(): File {
-    // Create an image file name
-    val fileName = "avatar.jpg"
-
-    val image = File(
-        externalCacheDir, /* directory */
-        fileName
-    )
-    return image
 }
 
 private fun isPermissionGranted(context: Context): Boolean {
