@@ -22,8 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -35,7 +33,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,7 +45,6 @@ import com.github.sewerina.taxresident.R
 import com.github.sewerina.taxresident.data.RecordEntity
 import com.github.sewerina.taxresident.ui.theme.ErrorCardWithText
 import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
-import kotlinx.coroutines.launch
 import java.time.Instant
 
 class RecordScreenCallbacks(
@@ -344,11 +340,7 @@ fun RecordScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun PickDateDialog(openDialog: MutableState<Boolean>, dateState: MutableState<Long?>) {
-    // Decoupled snackbar host state from scaffold state for demo purposes.
-    val snackState = remember { SnackbarHostState() }
-    val snackScope = rememberCoroutineScope()
-    SnackbarHost(hostState = snackState, Modifier)
-    // TODO demo how to read the selected date from the state.
+    // To read the selected date from the state.
     if (openDialog.value) {
         val datePickerState = rememberDatePickerState()
         val confirmEnabled =
@@ -364,11 +356,6 @@ private fun PickDateDialog(openDialog: MutableState<Boolean>, dateState: Mutable
                 TextButton(
                     onClick = {
                         openDialog.value = false
-                        snackScope.launch {
-                            snackState.showSnackbar(
-                                "Selected date timestamp: ${datePickerState.selectedDateMillis}"
-                            )
-                        }
                         dateState.value = datePickerState.selectedDateMillis
                     },
                     enabled = confirmEnabled.value,
