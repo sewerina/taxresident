@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,9 +49,7 @@ import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
 import java.time.Instant
 
 class RecordScreenCallbacks(
-    val onBack: () -> Unit,
-    val onSave: (RecordEntity) -> Unit,
-    val onDelete: (RecordEntity) -> Unit
+    val onBack: () -> Unit, val onSave: (RecordEntity) -> Unit, val onDelete: (RecordEntity) -> Unit
 )
 
 data class NonCrossingDateValidation(val valid: Boolean = true, val comment: String = "")
@@ -58,9 +57,7 @@ data class NonCrossingDateValidation(val valid: Boolean = true, val comment: Str
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordScreen(
-    record: RecordEntity,
-    list: List<RecordEntity>,
-    callbacks: RecordScreenCallbacks
+    record: RecordEntity, list: List<RecordEntity>, callbacks: RecordScreenCallbacks
 ) {
     val departureDateState = rememberSaveable { mutableStateOf(record.departureDate) }
     val arrivalDateState = rememberSaveable { mutableStateOf(record.arrivalDate) }
@@ -146,95 +143,74 @@ fun RecordScreen(
 
     val validState = remember {
         derivedStateOf {
-            departureDateState.value != null
-                    && validDepartureDateState.value
-                    && validProhibitDepartureDateInFutureState.value
-                    && validArrivalDateState.value
-                    && validNonCrossingDateState.value.valid
-                    && validSingleOpenArrivalDateEntityState.value
+            departureDateState.value != null && validDepartureDateState.value && validProhibitDepartureDateInFutureState.value && validArrivalDateState.value && validNonCrossingDateState.value.valid && validSingleOpenArrivalDateEntityState.value
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(modifier = Modifier.fillMaxWidth(),
-                title = { Text(text = stringResource(id = R.string.title_record)) },
-                colors = TaxresidentTheme.appBarColors,
-                navigationIcon = {
-                    IconButton(
-                        onClick = callbacks.onBack,
+    Scaffold(topBar = {
+        TopAppBar(modifier = Modifier.fillMaxWidth(),
+            title = { Text(text = stringResource(id = R.string.title_record)) },
+            colors = TaxresidentTheme.appBarColors,
+            navigationIcon = {
+                IconButton(onClick = callbacks.onBack, content = {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "back button"
+                    )
+                })
+            },
+            actions = {
+                PlainTooltipBox(tooltip = { Text(stringResource(R.string.tooltip_delete)) }) {
+                    if (record.id > 0) IconButton(modifier = Modifier.tooltipAnchor(),
+                        onClick = { callbacks.onDelete.invoke(record) },
                         content = {
                             Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "back button"
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "delete icon"
                             )
-                        }
+                        })
+                }
+            })
+    }, floatingActionButton = {
+        if (validState.value) {
+            ExtendedFloatingActionButton(containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 6.dp,
+                    hoveredElevation = 10.dp,
+                    focusedElevation = 10.dp,
+                    pressedElevation = 12.dp
+                ),
+                onClick = {
+                    val updated = RecordEntity(
+                        id = record.id,
+                        departureDate = departureDateState.value,
+                        arrivalDate = arrivalDateState.value,
+                        comment = commentText
+                    )
+                    callbacks.onSave.invoke(updated)
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Create, contentDescription = "create icon"
                     )
                 },
-                actions = {
-                    PlainTooltipBox(tooltip = { Text(stringResource(R.string.tooltip_delete)) }) {
-                        if (record.id > 0)
-                            IconButton(
-                                modifier = Modifier.tooltipAnchor(),
-                                onClick = { callbacks.onDelete.invoke(record) },
-                                content = {
-                                    Icon(
-                                        imageVector = Icons.Filled.Delete,
-                                        contentDescription = "delete icon"
-                                    )
-                                }
-                            )
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            if (validState.value) {
-                ExtendedFloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 6.dp,
-                        hoveredElevation = 10.dp,
-                        focusedElevation = 10.dp,
-                        pressedElevation = 12.dp
-                    ),
-                    onClick = {
-                        val updated = RecordEntity(
-                            id = record.id,
-                            departureDate = departureDateState.value,
-                            arrivalDate = arrivalDateState.value,
-                            comment = commentText
+                text = {
+                    Text(
+                        stringResource(
+                            id = if (record.id == 0) R.string.btn_create else R.string.btn_edit
                         )
-                        callbacks.onSave.invoke(updated)
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Create,
-                            contentDescription = "create icon"
-                        )
-                    },
-                    text = {
-                        Text(
-                            stringResource(
-                                id = if (record.id == 0) R.string.btn_create else R.string.btn_edit
-                            )
-                        )
-                    }
-                )
-            }
+                    )
+                })
         }
-    ) { paddingValues ->
+    }) { paddingValues ->
         // My content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = paddingValues.calculateTopPadding() + 16.dp,
-                    start = 48.dp,
-                    end = 48.dp
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
+                    top = paddingValues.calculateTopPadding() + 16.dp, start = 48.dp, end = 48.dp
+                ), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val departureInteractionSource = remember { MutableInteractionSource() }
             val arrivalInteractionSource = remember { MutableInteractionSource() }
@@ -251,10 +227,9 @@ fun RecordScreen(
                 ErrorCardWithText(stringResource(R.string.text_specify_arr_date))
             }
 
-            OutlinedTextField(
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .fillMaxWidth(),
+            OutlinedTextField(modifier = Modifier
+                .padding(bottom = 8.dp)
+                .fillMaxWidth(),
                 label = { Text(text = stringResource(R.string.label_dep_date)) },
                 value = departureDateState.value.show(),
                 onValueChange = { },
@@ -269,13 +244,11 @@ fun RecordScreen(
                 },
                 interactionSource = departureInteractionSource,
                 isError = !validDepartureDateState.value,
-                supportingText = { if (!validDepartureDateState.value) Text(text = stringResource(R.string.supportText_correct_dep_date)) }
-            )
+                supportingText = { if (!validDepartureDateState.value) Text(text = stringResource(R.string.supportText_correct_dep_date)) })
 
-            OutlinedTextField(
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .fillMaxWidth(),
+            OutlinedTextField(modifier = Modifier
+                .padding(bottom = 8.dp)
+                .fillMaxWidth(),
                 label = { Text(text = stringResource(R.string.label_arr_date)) },
                 value = arrivalDateState.value.show(),
                 onValueChange = { },
@@ -290,20 +263,25 @@ fun RecordScreen(
                 },
                 interactionSource = arrivalInteractionSource,
                 isError = !validArrivalDateState.value,
-                supportingText = { if (!validArrivalDateState.value) Text(text = stringResource(R.string.supportText_correct_arr_date)) }
-            )
+                supportingText = { if (!validArrivalDateState.value) Text(text = stringResource(R.string.supportText_correct_arr_date)) })
 
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(text = stringResource(R.string.label_comment)) },
                 value = commentText.show(),
                 onValueChange = { commentText = it },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = "comment icon"
+                    )
+                },
                 singleLine = false,
                 minLines = 1,
                 maxLines = 3,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    autoCorrect = true
+                    keyboardType = KeyboardType.Text, autoCorrect = true
                 )
             )
 
@@ -345,35 +323,24 @@ private fun PickDateDialog(openDialog: MutableState<Boolean>, dateState: Mutable
         val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateState.value)
         val confirmEnabled =
             remember { derivedStateOf { datePickerState.selectedDateMillis != null } }
-        DatePickerDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
+        DatePickerDialog(onDismissRequest = {
+            // Dismiss the dialog when the user clicks outside the dialog or on the back
+            // button. If you want to disable that functionality, simply use an empty
+            // onDismissRequest.
+            openDialog.value = false
+        }, confirmButton = {
+            TextButton(onClick = {
                 openDialog.value = false
+                dateState.value = datePickerState.selectedDateMillis
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                        dateState.value = datePickerState.selectedDateMillis
-                    },
-                    enabled = confirmEnabled.value,
-                    content = { Text(stringResource(R.string.btn_confirm)) }
-                )
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { openDialog.value = false },
-                    content = { Text(stringResource(R.string.btn_dismiss)) }
-                )
-            }
-        ) {
+                enabled = confirmEnabled.value,
+                content = { Text(stringResource(R.string.btn_confirm)) })
+        }, dismissButton = {
+            TextButton(onClick = { openDialog.value = false },
+                content = { Text(stringResource(R.string.btn_dismiss)) })
+        }) {
             DatePicker(
-                state = datePickerState,
-                title = null,
-                headline = null,
-                showModeToggle = false
+                state = datePickerState, title = null, headline = null, showModeToggle = false
             )
         }
     }
