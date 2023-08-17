@@ -342,7 +342,7 @@ fun RecordScreen(
 private fun PickDateDialog(openDialog: MutableState<Boolean>, dateState: MutableState<Long?>) {
     // To read the selected date from the state.
     if (openDialog.value) {
-        val datePickerState = rememberDatePickerState()
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateState.value)
         val confirmEnabled =
             remember { derivedStateOf { datePickerState.selectedDateMillis != null } }
         DatePickerDialog(
