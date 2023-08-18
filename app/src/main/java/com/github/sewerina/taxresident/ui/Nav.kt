@@ -8,6 +8,7 @@ class Nav {
         const val home = "home"
         const val record = "record"
         const val recordById = "record/{recordId}"
+        const val search = "search"
         const val settings = "settings"
         const val about = "about"
     }
@@ -34,4 +35,8 @@ fun NavHostController.toRecord() {
 // Go to an existed record
 fun NavHostController.toRecordById(recordId: Int) {
     this.navigate("record/${recordId}")
+}
+
+fun NavHostController.toSearch() {
+    this.navigate(Nav.search)
 }

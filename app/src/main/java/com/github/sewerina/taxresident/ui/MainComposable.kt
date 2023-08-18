@@ -47,7 +47,11 @@ fun TaxResidentNavHost(
                 R.drawable.hello_5
             )
             val randomDraw = helloDrawables.random()
-            AnimatedSplashScreen(randomDraw, settingsScreenCallbacks.onLoadUserName.invoke(), navController)
+            AnimatedSplashScreen(
+                randomDraw,
+                settingsScreenCallbacks.onLoadUserName.invoke(),
+                navController
+            )
         }
         composable(Nav.home) {
             HomeScreen(
@@ -56,9 +60,13 @@ fun TaxResidentNavHost(
                     onNewRecord = { navController.toRecord() },
                     onEdit = { recordId -> navController.toRecordById(recordId) },
                     onRemove = { record -> vm.delete(record) },
+                    onSearch = { navController.toSearch() },
                     onSettings = { navController.toSettings() },
                     onAbout = { navController.toAbout() })
             )
+        }
+        composable(Nav.search) {
+            SearchScreen()
         }
         composable(Nav.settings) {
             SettingsScreen(

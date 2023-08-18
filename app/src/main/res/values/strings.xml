@@ -10,6 +10,7 @@
     <string name="menuItem_photo_fromGallery">Взять фото из галереи</string>
     <string name="menuItem_new_photo">Сделать новое фото</string>
 
+    <string name="tooltip_search">Поиск</string>
     <string name="tooltip_more">Больше</string>
     <string name="tooltip_delete">Удалить</string>
 
@@ -28,6 +29,8 @@
     <string name="label_arr_date">Дата возвращения</string>
     <string name="label_comment">Комментарий</string>
     <string name="label_input_name">Введите имя</string>
+
+    <string name="placeholder_search">Поиск по комментарию</string>
 
     <string name="supportText_correct_dep_date">Введите корректную дату отъезда!</string>
     <string name="supportText_correct_arr_date">Введите корректную дату возвращения!</string>

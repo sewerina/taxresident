@@ -19,8 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -72,6 +73,7 @@ class HomeScreenCallbacks(
     val onNewRecord: () -> Unit,
     val onEdit: (Int) -> Unit,
     val onRemove: (RecordEntity) -> Unit,
+    val onSearch: () -> Unit,
     val onSettings: () -> Unit,
     val onAbout: () -> Unit
 )
@@ -92,13 +94,26 @@ fun HomeScreen(
                 title = { Text(text = stringResource(id = R.string.app_name)) },
                 colors = TaxresidentTheme.appBarColors,
                 actions = {
+                    PlainTooltipBox(tooltip = { Text(stringResource(R.string.tooltip_search)) }) {
+                        IconButton(
+                            modifier = Modifier.tooltipAnchor(),
+                            onClick =  callbacks.onSearch,
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "search icon"
+                                )
+                            }
+                        )
+                    }
+
                     PlainTooltipBox(tooltip = { Text(stringResource(R.string.tooltip_more)) }) {
                         IconButton(
                             modifier = Modifier.tooltipAnchor(),
                             onClick = { expandedMenuState.value = true },
                             content = {
                                 Icon(
-                                    imageVector = Icons.Filled.MoreVert,
+                                    imageVector = Icons.Outlined.MoreVert,
                                     contentDescription = "more icon"
                                 )
                             }
