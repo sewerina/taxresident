@@ -12,6 +12,9 @@ interface RecordDao {
     @Query("SELECT * FROM record ORDER BY departure_date DESC")
     suspend fun getAll(): List<RecordEntity>
 
+    @Query("SELECT * FROM record WHERE record.comment LIKE :query ORDER BY departure_date DESC")
+    suspend fun search(query: String): List<RecordEntity>
+
     @Insert
     suspend fun add(recordEntity: RecordEntity)
 

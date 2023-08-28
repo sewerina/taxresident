@@ -15,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val recordDao: RecordDao) : ViewModel() {
     val mainViewState = MutableLiveData(MainViewState.initial)
+    val searchViewState = MutableLiveData(SearchViewState.initial)
 
     init {}
 
@@ -26,8 +27,8 @@ class MainViewModel @Inject constructor(private val recordDao: RecordDao) : View
 
     suspend fun _load() {
         delay(1200)
-        val list = recordDao.getAll()
-        mainViewState.postValue(MainViewState(list = list, loading = false))
+        val recordList = recordDao.getAll()
+        mainViewState.postValue(MainViewState(list = recordList, loading = false))
     }
 
     fun getRecord(recordId: Int): RecordEntity {
@@ -68,6 +69,42 @@ class MainViewModel @Inject constructor(private val recordDao: RecordDao) : View
             }
         }
     }
+
+    fun search(query: String) {
+        viewModelScope.launch {
+            //ToDo
+            searchViewState.postValue(
+                SearchViewState(
+                    recordList = emptyList(),
+                    suggestionList = emptyList(),
+                    query = "",
+                    loading = true
+                )
+            )
+            val searchList = recordDao.search("%${query}%")
+            searchViewState.postValue(
+                SearchViewState(
+                    recordList = searchList,
+                    suggestionList = emptyList(),
+                    query = query,
+                    loading = false
+                )
+            )
+        }
+    }
+
+    fun clearSearch() {
+        viewModelScope.launch {
+            searchViewState.postValue(
+                SearchViewState(
+                    recordList = emptyList(),
+                    suggestionList = emptyList(),
+                    query = "",
+                    loading = false
+                )
+            )
+        }
+    }
 }
 
 class MainViewState(val list: List<RecordEntity>, val loading: Boolean) {
@@ -90,5 +127,21 @@ class MainViewState(val list: List<RecordEntity>, val loading: Boolean) {
         }
 
         leftDays = LIMIT_DAYS - usedDays
+    }
+}
+
+class SearchViewState(
+    val recordList: List<RecordEntity>,
+    val suggestionList: List<String>,
+    val query: String,
+    val loading: Boolean
+) {
+    companion object {
+        val initial = SearchViewState(
+            recordList = emptyList(),
+            suggestionList = emptyList(),
+            query = "",
+            loading = false
+        )
     }
 }

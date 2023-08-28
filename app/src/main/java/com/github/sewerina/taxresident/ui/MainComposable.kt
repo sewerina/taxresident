@@ -1,6 +1,5 @@
 package com.github.sewerina.taxresident.ui
 
-
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,7 +65,11 @@ fun TaxResidentNavHost(
             )
         }
         composable(Nav.search) {
-            SearchScreen()
+            SearchScreen(vm, SearchScreenCallbacks(
+                onEdit = { recordId -> navController.toRecordById(recordId) },
+                onRemove = { record -> vm.delete(record) },
+                onBack = { navController.popBackStack() }
+            ))
         }
         composable(Nav.settings) {
             SettingsScreen(

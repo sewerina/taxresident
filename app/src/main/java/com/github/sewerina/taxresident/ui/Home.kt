@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.github.sewerina.taxresident.MainViewState
 import com.github.sewerina.taxresident.R
+import com.github.sewerina.taxresident.SearchViewState
 import com.github.sewerina.taxresident.data.RecordEntity
 import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
 
@@ -222,7 +223,7 @@ fun HomeScreen(
                 }
             }
 
-            ListView(state, callbacks.onEdit, callbacks.onRemove)
+            MainListView(state, callbacks.onEdit, callbacks.onRemove)
         }
 
         if (state.value.loading) {
@@ -239,16 +240,30 @@ fun HomeScreen(
     }
 }
 
+@Composable
+fun MainListView(
+    mainViewState: State<MainViewState>, onEdit: (Int) -> Unit, onRemove: (RecordEntity) -> Unit
+){
+    ListView(mainViewState.value.list, onEdit, onRemove)
+}
+
+@Composable
+fun SearchListView(
+    searchViewState: State<SearchViewState>, onEdit: (Int) -> Unit, onRemove: (RecordEntity) -> Unit
+){
+    ListView(searchViewState.value.recordList, onEdit, onRemove)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListView(
-    mainViewState: State<MainViewState>, onEdit: (Int) -> Unit, onRemove: (RecordEntity) -> Unit
+    recordEntities: List<RecordEntity>, onEdit: (Int) -> Unit, onRemove: (RecordEntity) -> Unit
 ) {
     val listState = rememberLazyListState()
 
     LazyColumn(modifier = Modifier.fillMaxHeight(), state = listState) {
         items(
-            items = mainViewState.value.list,
+            items = recordEntities,
             key = { rec -> rec.id }
         ) { record ->
             val dismissState = rememberDismissState()
@@ -297,8 +312,9 @@ fun ListView(
         }
     }
 
-    LaunchedEffect(key1 = mainViewState.value.list.size) {
-        if (mainViewState.value.list.isNotEmpty()) {
+    // Для отслеживания изменения размера списка (при удалении или добавлении элемента) используем LaunchedEffect
+    LaunchedEffect(key1 = recordEntities.size) {
+        if (recordEntities.isNotEmpty()) {
             listState.animateScrollToItem(0)
         }
     }
