@@ -223,7 +223,11 @@ fun HomeScreen(
                 }
             }
 
-            MainListView(state, callbacks.onEdit, callbacks.onRemove)
+            if (state.value.list.isEmpty() && !state.value.loading) {
+                EmptyList(text = stringResource(id = R.string.text_emptyList_first))
+            } else {
+                MainListView(state, callbacks.onEdit, callbacks.onRemove)
+            }
         }
 
         if (state.value.loading) {
