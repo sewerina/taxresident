@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,9 +47,7 @@ import com.github.sewerina.taxresident.SearchViewState
 import com.github.sewerina.taxresident.data.RecordEntity
 
 class SearchScreenCallbacks(
-    val onEdit: (Int) -> Unit,
-    val onRemove: (RecordEntity) -> Unit,
-    val onBack: () -> Unit
+    val onEdit: (Int) -> Unit, val onRemove: (RecordEntity) -> Unit, val onBack: () -> Unit
 )
 
 @OptIn(
@@ -88,17 +88,15 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
                 onActiveChange = { value -> isActiveSearch.value = value },
                 leadingIcon = {
                     // Кнопка-стрелка назад
-                    IconButton(
-                        content = {
-                            Icon(
-                                imageVector = Icons.Outlined.ArrowBack,
-                                contentDescription = "arrow back icon"
-                            )
-                        },
-                        onClick = {
-                            isActiveSearch.value = false
-                            searchScreenCallbacks.onBack.invoke()
-                        })
+                    IconButton(content = {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBack,
+                            contentDescription = "arrow back icon"
+                        )
+                    }, onClick = {
+                        isActiveSearch.value = false
+                        searchScreenCallbacks.onBack.invoke()
+                    })
                 },
                 trailingIcon = {
                     // Кнопка "Очистить/Х"
@@ -129,7 +127,9 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
                                 ),
                                 label = {
                                     Text(
-                                        modifier = Modifier.padding(4.dp), text = item, fontSize = 16.sp
+                                        modifier = Modifier.padding(4.dp),
+                                        text = item,
+                                        fontSize = 16.sp
                                     )
                                 },
                                 onClick = {
@@ -150,13 +150,23 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
                 if (searchState.value.recordList.isNotEmpty()) {
                     //Список из Home - ListView или всего лишь один элемент списка
                     SearchListView(
-                        searchState,
-                        searchScreenCallbacks.onEdit,
-                        searchScreenCallbacks.onRemove
+                        searchState, searchScreenCallbacks.onEdit, searchScreenCallbacks.onRemove
                     )
                 } else if (searchState.value.query.isNotEmpty()) {
                     EmptyList(text = stringResource(id = R.string.text_emptyList_search))
                 }
+            }
+        }
+
+        if (searchState.value.loading) {
+            // Progress
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(56.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = Color.LightGray,
+                    strokeWidth = 4.dp,
+                )
             }
         }
     }
@@ -183,15 +193,13 @@ fun EmptyList(@PreviewParameter(EmptyListPreviewParameterProvider::class, limit 
             contentDescription = "empty list"
         )
         Text(
-            textAlign = TextAlign.Center,
-            text = text
+            textAlign = TextAlign.Center, text = text
         )
     }
 }
 
 class EmptyListPreviewParameterProvider : PreviewParameterProvider<String> {
     override val values = sequenceOf(
-        "Пока не создано ни одной записи",
-        "Ничего по заданному запросу не найдено"
+        "Пока не создано ни одной записи", "Ничего по заданному запросу не найдено"
     )
 }
