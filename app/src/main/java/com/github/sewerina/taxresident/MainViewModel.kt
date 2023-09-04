@@ -5,15 +5,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.sewerina.taxresident.data.RecordDao
 import com.github.sewerina.taxresident.data.RecordEntity
+import com.github.sewerina.taxresident.data.SuggestionDao
+import com.github.sewerina.taxresident.data.SuggestionEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val recordDao: RecordDao) : ViewModel() {
+class MainViewModel @Inject constructor(
+    private val recordDao: RecordDao,
+    private val suggestionDao: SuggestionDao
+) : ViewModel() {
     val mainViewState = MutableLiveData(MainViewState.initial)
     val searchViewState = MutableLiveData(SearchViewState.initial)
 
@@ -72,7 +78,6 @@ class MainViewModel @Inject constructor(private val recordDao: RecordDao) : View
 
     fun search(query: String) {
         viewModelScope.launch {
-            //ToDo
             searchViewState.postValue(
                 SearchViewState(
                     recordList = emptyList(),
@@ -82,11 +87,29 @@ class MainViewModel @Inject constructor(private val recordDao: RecordDao) : View
                 )
             )
             val searchList = recordDao.search("%${query}%")
+
+            suggestionDao.delete(query)
+            suggestionDao.add(SuggestionEntity(id = 0, suggestion = query, usedDate = Date().time))
+            val suggestionList = suggestionDao.getAll().map { it.suggestion }
+
             searchViewState.postValue(
                 SearchViewState(
                     recordList = searchList,
-                    suggestionList = emptyList(),
+                    suggestionList = suggestionList,
                     query = query,
+                    loading = false
+                )
+            )
+        }
+    }
+
+    fun initSuggestionList() {
+        viewModelScope.launch {
+            searchViewState.postValue(
+                SearchViewState(
+                    recordList = emptyList(),
+                    suggestionDao.getAll().map { it.suggestion },
+                    query = "",
                     loading = false
                 )
             )
@@ -98,7 +121,7 @@ class MainViewModel @Inject constructor(private val recordDao: RecordDao) : View
             searchViewState.postValue(
                 SearchViewState(
                     recordList = emptyList(),
-                    suggestionList = emptyList(),
+                    suggestionList = searchViewState.value?.suggestionList ?: emptyList(),
                     query = "",
                     loading = false
                 )

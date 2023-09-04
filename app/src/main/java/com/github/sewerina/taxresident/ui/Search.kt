@@ -25,6 +25,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,18 +62,13 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
     val isActiveSearch = remember {
         mutableStateOf(false)
     }
-    val searchHistoryList = remember {
-        mutableStateOf(listOf("January", "Febrary", "March", "May", "July", "August"))
-    }
 
     Column(
-        modifier = Modifier
-////                .background(color = Color.White)
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         SearchBar(modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 128.dp),
+            .heightIn(max = if (searchState.value.suggestionList.isEmpty()) 68.dp else 128.dp),
             placeholder = { Text(text = stringResource(R.string.placeholder_search)) },
             shape = SearchBarDefaults.fullScreenShape,
             windowInsets = SearchBarDefaults.windowInsets,
@@ -117,27 +113,29 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
                     }
                 })
             }) {
-            // Отображение списка истории поиска
-            LazyRow() {
-                items(searchHistoryList.value) { item ->
-                    SuggestionChip(modifier = Modifier.padding(4.dp),
-                        enabled = true,
-                        icon = null,
-                        border = SuggestionChipDefaults.suggestionChipBorder(borderColor = MaterialTheme.colorScheme.onPrimaryContainer),
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                        label = {
-                            Text(
-                                modifier = Modifier.padding(4.dp), text = item, fontSize = 16.sp
-                            )
-                        },
-                        onClick = {
-                            searchText.value = item
-                            isActiveSearch.value = false
-                            viewModel.search(searchText.value)
-                        })
+            if (searchState.value.suggestionList.isNotEmpty()) {
+                // Отображение списка истории поиска
+                LazyRow() {
+                    items(searchState.value.suggestionList) { item ->
+                        SuggestionChip(modifier = Modifier.padding(4.dp),
+                            enabled = true,
+                            icon = null,
+                            border = SuggestionChipDefaults.suggestionChipBorder(borderColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
+                            label = {
+                                Text(
+                                    modifier = Modifier.padding(4.dp), text = item, fontSize = 16.sp
+                                )
+                            },
+                            onClick = {
+                                searchText.value = item
+                                isActiveSearch.value = false
+                                viewModel.search(searchText.value)
+                            })
+                    }
                 }
             }
         }
@@ -158,6 +156,10 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
                 EmptyList(text = stringResource(id = R.string.text_emptyList_search))
             }
         }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.initSuggestionList()
     }
 }
 

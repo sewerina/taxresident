@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.github.sewerina.taxresident.data.AppDatabase
 import com.github.sewerina.taxresident.data.RecordDao
+import com.github.sewerina.taxresident.data.SuggestionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,15 +18,19 @@ class DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
-        return Room.databaseBuilder(
-            appContext,
-            AppDatabase::class.java,
-            "Records"
-        ).build()
+        return Room
+            .databaseBuilder(
+                appContext,
+                AppDatabase::class.java,
+                "Records"
+            )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
-    fun provideRecordDao(appDatabase: AppDatabase): RecordDao {
-        return appDatabase.recordDao()
-    }
+    fun provideRecordDao(appDatabase: AppDatabase): RecordDao = appDatabase.recordDao()
+
+    @Provides
+    fun provideSuggestionDao(appDatabase: AppDatabase): SuggestionDao = appDatabase.suggestionDao()
 }
