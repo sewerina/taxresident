@@ -23,6 +23,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,97 +64,99 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
         mutableStateOf(false)
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        SearchBar(modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = if (searchState.value.suggestionList.isEmpty()) 68.dp else 128.dp),
-            placeholder = { Text(text = stringResource(R.string.placeholder_search)) },
-            shape = SearchBarDefaults.fullScreenShape,
-            windowInsets = SearchBarDefaults.windowInsets,
-            colors = SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.background,
-                dividerColor = MaterialTheme.colorScheme.onBackground
-            ),
-            query = searchText.value,
-            onQueryChange = { changedValue -> searchText.value = changedValue },
-            onSearch = {
-                isActiveSearch.value = false
-                viewModel.search(searchText.value)
-            },
-            active = isActiveSearch.value,
-            onActiveChange = { value -> isActiveSearch.value = value },
-            leadingIcon = {
-                // Кнопка-стрелка назад
-                IconButton(
-                    content = {
+    Surface() {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            SearchBar(modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = if (searchState.value.suggestionList.isEmpty()) 68.dp else 128.dp),
+                placeholder = { Text(text = stringResource(R.string.placeholder_search)) },
+                shape = SearchBarDefaults.fullScreenShape,
+                windowInsets = SearchBarDefaults.windowInsets,
+                colors = SearchBarDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    dividerColor = MaterialTheme.colorScheme.onBackground
+                ),
+                query = searchText.value,
+                onQueryChange = { changedValue -> searchText.value = changedValue },
+                onSearch = {
+                    isActiveSearch.value = false
+                    viewModel.search(searchText.value)
+                },
+                active = isActiveSearch.value,
+                onActiveChange = { value -> isActiveSearch.value = value },
+                leadingIcon = {
+                    // Кнопка-стрелка назад
+                    IconButton(
+                        content = {
+                            Icon(
+                                imageVector = Icons.Outlined.ArrowBack,
+                                contentDescription = "arrow back icon"
+                            )
+                        },
+                        onClick = {
+                            isActiveSearch.value = false
+                            searchScreenCallbacks.onBack.invoke()
+                        })
+                },
+                trailingIcon = {
+                    // Кнопка "Очистить/Х"
+                    IconButton(content = {
                         Icon(
-                            imageVector = Icons.Outlined.ArrowBack,
-                            contentDescription = "arrow back icon"
+                            imageVector = Icons.Outlined.Clear, contentDescription = "clear icon"
                         )
-                    },
-                    onClick = {
-                        isActiveSearch.value = false
-                        searchScreenCallbacks.onBack.invoke()
+                    }, onClick = {
+                        if (searchText.value.isNotEmpty()) {
+                            searchText.value = ""
+                            viewModel.clearSearch()
+                        } else {
+                            isActiveSearch.value = false
+                        }
                     })
-            },
-            trailingIcon = {
-                // Кнопка "Очистить/Х"
-                IconButton(content = {
-                    Icon(
-                        imageVector = Icons.Outlined.Clear, contentDescription = "clear icon"
-                    )
-                }, onClick = {
-                    if (searchText.value.isNotEmpty()) {
-                        searchText.value = ""
-                        viewModel.clearSearch()
-                    } else {
-                        isActiveSearch.value = false
-                    }
-                })
-            }) {
-            if (searchState.value.suggestionList.isNotEmpty()) {
-                // Отображение списка истории поиска
-                LazyRow() {
-                    items(searchState.value.suggestionList) { item ->
-                        SuggestionChip(modifier = Modifier.padding(4.dp),
-                            enabled = true,
-                            icon = null,
-                            border = SuggestionChipDefaults.suggestionChipBorder(borderColor = MaterialTheme.colorScheme.onPrimaryContainer),
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                            label = {
-                                Text(
-                                    modifier = Modifier.padding(4.dp), text = item, fontSize = 16.sp
-                                )
-                            },
-                            onClick = {
-                                searchText.value = item
-                                isActiveSearch.value = false
-                                viewModel.search(searchText.value)
-                            })
+                }) {
+                if (searchState.value.suggestionList.isNotEmpty()) {
+                    // Отображение списка истории поиска
+                    LazyRow() {
+                        items(searchState.value.suggestionList) { item ->
+                            SuggestionChip(modifier = Modifier.padding(4.dp),
+                                enabled = true,
+                                icon = null,
+                                border = SuggestionChipDefaults.suggestionChipBorder(borderColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                                colors = SuggestionChipDefaults.suggestionChipColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                ),
+                                label = {
+                                    Text(
+                                        modifier = Modifier.padding(4.dp), text = item, fontSize = 16.sp
+                                    )
+                                },
+                                onClick = {
+                                    searchText.value = item
+                                    isActiveSearch.value = false
+                                    viewModel.search(searchText.value)
+                                })
+                        }
                     }
                 }
             }
-        }
 
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-        ) {
-            if (searchState.value.recordList.isNotEmpty()) {
-                //Список из Home - ListView или всего лишь один элемент списка
-                SearchListView(
-                    searchState,
-                    searchScreenCallbacks.onEdit,
-                    searchScreenCallbacks.onRemove
-                )
-            } else if (searchState.value.query.isNotEmpty()) {
-                EmptyList(text = stringResource(id = R.string.text_emptyList_search))
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(top = 0.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+            ) {
+                if (searchState.value.recordList.isNotEmpty()) {
+                    //Список из Home - ListView или всего лишь один элемент списка
+                    SearchListView(
+                        searchState,
+                        searchScreenCallbacks.onEdit,
+                        searchScreenCallbacks.onRemove
+                    )
+                } else if (searchState.value.query.isNotEmpty()) {
+                    EmptyList(text = stringResource(id = R.string.text_emptyList_search))
+                }
             }
         }
     }
