@@ -1,5 +1,8 @@
 package com.github.sewerina.taxresident.ui
 
+import android.content.Context
+import android.webkit.WebChromeClient
+import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,13 +17,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.github.sewerina.taxresident.R
 import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,18 +41,44 @@ fun AboutScreen(onBack: () -> Unit) {
                 })
             })
     }) { paddingValues ->
-        Text(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = paddingValues.calculateTopPadding() + 8.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
-            textAlign = TextAlign.Justify,
-            text = stringResource(id = R.string.text_about),
-            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic)
-        )
+        HtmlText(htmlName = "about.html", topPadding = paddingValues.calculateTopPadding())
     }
 }
+
+// htmlName - имя файла с html-размеченным текстом в папке assets
+@Composable
+fun HtmlText(htmlName: String, topPadding: Dp) {
+    // Наш html-файл записываем в буффер, а потом этот буффер в string
+    val context = LocalContext.current
+    val assetManager = context.assets
+    val inputStream = assetManager.open("html/$htmlName")
+    val size = inputStream.available()
+    val buffer = ByteArray(size)
+    inputStream.read(buffer)
+
+    val backgroundColor = MaterialTheme.colorScheme.background.toArgb().hexToString()
+    val textColor = MaterialTheme.colorScheme.onBackground.toArgb().hexToString()
+    val linkColor = MaterialTheme.colorScheme.primary.toArgb().hexToString()
+    val htmlString = String(buffer)
+        .replace("{background}", backgroundColor)
+        .replace("{color}", textColor)
+        .replace("{linkColor}", linkColor)
+
+    AndroidView(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = topPadding,
+                start = 0.dp,
+                end = 0.dp,
+                bottom = 0.dp
+            ),
+        factory = { it: Context ->
+            WebView(it).apply {
+                webChromeClient = object : WebChromeClient() {}
+                loadDataWithBaseURL(null, htmlString, "text/html; charset=utf-8", "utf-8", null)
+            }
+        })
+}
+
+fun Int.hexToString() = String.format("#%06X", 0xFFFFFF and this)

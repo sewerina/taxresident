@@ -23,7 +23,6 @@
     <string name="textSwitch_style">Включить темную тему</string>
     <string name="text_dark_theme">Темная тема включена</string>
     <string name="text_light_theme">По умолчанию светлая тема</string>
-    <string name="text_about">Данное приложение помогает считать дни, которые учитываются для сохранения статуса налогового резидента Российской Федерации.</string>
     <string name="text_emptyList_first">Пока не создано ни одной записи</string>
     <string name="text_emptyList_search">Ничего по заданному запросу не найдено</string>
 
