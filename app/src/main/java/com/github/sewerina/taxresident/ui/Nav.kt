@@ -12,7 +12,6 @@ class Nav {
         const val settings = "settings"
         const val about = "about"
     }
-
 }
 
 fun NavHostController.toHome() {

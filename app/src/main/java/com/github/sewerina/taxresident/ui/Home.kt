@@ -54,7 +54,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -84,7 +83,6 @@ class HomeScreenCallbacks(
 fun HomeScreen(
     state: State<MainViewState>, callbacks: HomeScreenCallbacks
 ) {
-    val context = LocalContext.current
     val expandedMenuState = remember {
         mutableStateOf(false)
     }
@@ -98,7 +96,7 @@ fun HomeScreen(
                     PlainTooltipBox(tooltip = { Text(stringResource(R.string.tooltip_search)) }) {
                         IconButton(
                             modifier = Modifier.tooltipAnchor(),
-                            onClick =  callbacks.onSearch,
+                            onClick = callbacks.onSearch,
                             content = {
                                 Icon(
                                     imageVector = Icons.Outlined.Search,
@@ -174,8 +172,6 @@ fun HomeScreen(
                     )
                 ) {
                     Icon(
-//                        modifier = Modifier.size(24.dp),
-//                        painter = painterResource(id = R.drawable.ic_add),
                         imageVector = Icons.Filled.Add,
                         contentDescription = "add icon"
                     )
@@ -247,14 +243,14 @@ fun HomeScreen(
 @Composable
 fun MainListView(
     mainViewState: State<MainViewState>, onEdit: (Int) -> Unit, onRemove: (RecordEntity) -> Unit
-){
+) {
     ListView(mainViewState.value.list, onEdit, onRemove)
 }
 
 @Composable
 fun SearchListView(
     searchViewState: State<SearchViewState>, onEdit: (Int) -> Unit, onRemove: (RecordEntity) -> Unit
-){
+) {
     ListView(searchViewState.value.recordList, onEdit, onRemove)
 }
 
@@ -337,9 +333,6 @@ fun ListItem(record: RecordEntity, onEdit: (Int) -> Unit) {
                 2.dp
             )
         ),
-//        colors = CardDefaults.cardColors(
-//            containerColor = MaterialTheme.colorScheme.primaryContainer
-//        ),
         onClick = { onEdit.invoke(record.id) }) {
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)) {
             Text(

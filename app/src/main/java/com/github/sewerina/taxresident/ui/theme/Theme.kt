@@ -1,6 +1,5 @@
 package com.github.sewerina.taxresident.ui.theme
 
-
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -22,9 +21,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-//    primary = Purple80,
-//    secondary = PurpleGrey80,
-//    tertiary = Pink80
     primary = Color(0xff56dbc5),
     onPrimary = Color(0xff003730),
     primaryContainer = Color(0xff005046),
@@ -32,14 +28,10 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-//    primary = Purple40,
-//    secondary = PurpleGrey40,
-//    tertiary = Pink40
     primary = Color(0xff006b5e),
     onPrimary = Color(0xffffffff),
     primaryContainer = Color(0xff76f8e1),
     onPrimaryContainer = Color(0xff00201b)
-
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -56,8 +48,7 @@ private val LightColorScheme = lightColorScheme(
 fun TaxresidentTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    dynamicColor: Boolean = true, content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -78,15 +69,13 @@ fun TaxresidentTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
+        colorScheme = colorScheme, content = content
     )
 }
 
 object TaxresidentTheme {
     val errorCardColors: CardColors
-        @Composable
-        get() {
+        @Composable get() {
             return androidx.compose.material3.CardDefaults.outlinedCardColors(
                 containerColor = androidx.compose.material3.MaterialTheme.colorScheme.errorContainer,
                 contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onErrorContainer
@@ -95,8 +84,7 @@ object TaxresidentTheme {
 
     @OptIn(ExperimentalMaterial3Api::class)
     val appBarColors: TopAppBarColors
-        @Composable
-        get() {
+        @Composable get() {
             return TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
