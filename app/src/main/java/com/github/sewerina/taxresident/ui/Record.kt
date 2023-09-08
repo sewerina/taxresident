@@ -323,22 +323,30 @@ private fun PickDateDialog(openDialog: MutableState<Boolean>, dateState: Mutable
         val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateState.value)
         val confirmEnabled =
             remember { derivedStateOf { datePickerState.selectedDateMillis != null } }
-        DatePickerDialog(onDismissRequest = {
-            // Dismiss the dialog when the user clicks outside the dialog or on the back
-            // button. If you want to disable that functionality, simply use an empty
-            // onDismissRequest.
-            openDialog.value = false
-        }, confirmButton = {
-            TextButton(onClick = {
+        DatePickerDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
                 openDialog.value = false
-                dateState.value = datePickerState.selectedDateMillis
             },
-                enabled = confirmEnabled.value,
-                content = { Text(stringResource(R.string.btn_confirm)) })
-        }, dismissButton = {
-            TextButton(onClick = { openDialog.value = false },
-                content = { Text(stringResource(R.string.btn_dismiss)) })
-        }) {
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                        dateState.value = datePickerState.selectedDateMillis
+                    },
+                    enabled = confirmEnabled.value,
+                    content = { Text(stringResource(R.string.btn_confirm)) }
+                )
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { openDialog.value = false },
+                    content = { Text(stringResource(R.string.btn_dismiss)) }
+                )
+            }
+        ) {
             DatePicker(
                 state = datePickerState, title = null, headline = null, showModeToggle = false
             )
