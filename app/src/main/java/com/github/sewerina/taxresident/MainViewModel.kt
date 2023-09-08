@@ -69,7 +69,6 @@ class MainViewModel @Inject constructor(
         }
         viewModelScope.launch {
             if (entity.id > 0) {
-//                Log.i("VM", "delete: ${entity.id}")
                 recordDao.delete(entity)
                 _load()
             }
