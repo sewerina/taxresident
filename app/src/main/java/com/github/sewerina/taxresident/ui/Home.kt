@@ -126,7 +126,10 @@ fun HomeScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.menuItem_settings)) },
-                            onClick = { callbacks.onSettings.invoke() },
+                            onClick = {
+                                expandedMenuState.value = false
+                                callbacks.onSettings.invoke()
+                            },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.Settings,
@@ -141,7 +144,10 @@ fun HomeScreen(
 
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.menuItem_about)) },
-                            onClick = { callbacks.onAbout.invoke() },
+                            onClick = {
+                                expandedMenuState.value = false
+                                callbacks.onAbout.invoke()
+                            },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.Info,
