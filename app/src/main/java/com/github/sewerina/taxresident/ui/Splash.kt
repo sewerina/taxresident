@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -80,7 +81,7 @@ private fun SplashScreen(randomDraw: Int, alfa: Float, avatarBitmap: Bitmap?, us
             }
 
             Text(
-                text = "Приветствуем,\n${userName}!",
+                text = "${stringResource(id = R.string.text_hello)}\n${userName}!",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
