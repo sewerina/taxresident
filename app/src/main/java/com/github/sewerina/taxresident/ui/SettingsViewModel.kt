@@ -10,10 +10,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(private val dataStoreManager: DataStoreManager) :
     ViewModel() {
-//    companion object {
-//        private const val USER_NAME = "User name"
-//        private const val DARK_THEME = "Dark theme"
-//    }
 
     fun setUserName(name: String) {
         viewModelScope.launch {
@@ -34,26 +30,4 @@ class SettingsViewModel @Inject constructor(private val dataStoreManager: DataSt
     fun getDarkTheme(): Flow<Boolean?> {
         return dataStoreManager.getDarkTheme()
     }
-
-//    fun setUserName(name: String) {
-//        sharedPreferences.edit().putString(USER_NAME, name).apply()
-//    }
-//
-//    fun getUserName(): String {
-//        if (sharedPreferences.contains(USER_NAME)) {
-//            return sharedPreferences.getString(USER_NAME, "Пользователь")!!
-//        }
-//        return "Пользователь"
-//    }
-//
-//    fun setDarkTheme(value: Boolean) {
-//        sharedPreferences.edit().putBoolean(DARK_THEME, value).apply()
-//    }
-//
-//    fun getDarkTheme(): Boolean? {
-//        if (sharedPreferences.contains(DARK_THEME)) {
-//            return sharedPreferences.getBoolean(DARK_THEME, false)
-//        }
-//        return null
-//    }
 }
