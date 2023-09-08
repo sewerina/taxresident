@@ -88,30 +88,36 @@ fun SearchScreen(viewModel: MainViewModel, searchScreenCallbacks: SearchScreenCa
                 onActiveChange = { value -> isActiveSearch.value = value },
                 leadingIcon = {
                     // Кнопка-стрелка назад
-                    IconButton(content = {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBack,
-                            contentDescription = "arrow back icon"
-                        )
-                    }, onClick = {
-                        isActiveSearch.value = false
-                        searchScreenCallbacks.onBack.invoke()
-                    })
+                    IconButton(
+                        content = {
+                            Icon(
+                                imageVector = Icons.Outlined.ArrowBack,
+                                contentDescription = "arrow back icon"
+                            )
+                        },
+                        onClick = {
+                            isActiveSearch.value = false
+                            searchScreenCallbacks.onBack.invoke()
+                        }
+                    )
                 },
                 trailingIcon = {
                     // Кнопка "Очистить/Х"
-                    IconButton(content = {
-                        Icon(
-                            imageVector = Icons.Outlined.Clear, contentDescription = "clear icon"
-                        )
-                    }, onClick = {
-                        if (searchText.value.isNotEmpty()) {
-                            searchText.value = ""
-                            viewModel.clearSearch()
-                        } else {
-                            isActiveSearch.value = false
-                        }
-                    })
+                    IconButton(
+                        content = {
+                            Icon(
+                                imageVector = Icons.Outlined.Clear,
+                                contentDescription = "clear icon"
+                            )
+                        },
+                        onClick = {
+                            if (searchText.value.isNotEmpty()) {
+                                searchText.value = ""
+                                viewModel.clearSearch()
+                            } else {
+                                isActiveSearch.value = false
+                            }
+                        })
                 }) {
                 if (searchState.value.suggestionList.isNotEmpty()) {
                     // Отображение списка истории поиска
