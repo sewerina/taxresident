@@ -196,7 +196,7 @@ fun EmptyList(@PreviewParameter(EmptyListPreviewParameterProvider::class, limit 
                 .size(48.dp),
             imageVector = Icons.Outlined.Warning,
             tint = MaterialTheme.colorScheme.primary,
-            contentDescription = "empty list"
+            contentDescription = "empty list icon"
         )
         Text(
             textAlign = TextAlign.Center, text = text
