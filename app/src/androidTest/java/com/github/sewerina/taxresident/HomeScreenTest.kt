@@ -4,17 +4,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.hasAnySibling
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.printToLog
 import com.github.sewerina.taxresident.data.RecordEntity
 import com.github.sewerina.taxresident.ui.HomeScreen
 import com.github.sewerina.taxresident.ui.HomeScreenCallbacks
@@ -22,8 +18,7 @@ import com.github.sewerina.taxresident.ui.theme.TaxresidentTheme
 import org.junit.Rule
 import org.junit.Test
 
-class ScreensTest {
-
+class HomeScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -36,7 +31,7 @@ class ScreensTest {
 
     @Test
     fun homeTopAppBarAndFab() {
-        val state =  mutableStateOf(MainViewState(emptyList(), false))
+        val state = mutableStateOf(MainViewState(emptyList(), false))
         composeTestRule.setContent {
             TaxresidentTheme {
                 HomeScreen(state = state, callbacks = HomeScreenCallbacks({}, {}, {}, {}, {}, {}))
@@ -45,16 +40,19 @@ class ScreensTest {
         composeTestRule
             .onNode(hasText("Tax Resident")).assertIsDisplayed()
 
-        composeTestRule.onNodeWithContentDescription(labelSearchIcon).assertIsDisplayed().assertHasClickAction()
+        composeTestRule.onNodeWithContentDescription(labelSearchIcon).assertIsDisplayed()
+            .assertHasClickAction()
 
-        composeTestRule.onNodeWithContentDescription(labelMoreIcon).assertIsDisplayed().assertHasClickAction()
+        composeTestRule.onNodeWithContentDescription(labelMoreIcon).assertIsDisplayed()
+            .assertHasClickAction()
 
-        composeTestRule.onNodeWithContentDescription(labelAddIcon).assertIsDisplayed().assertHasClickAction()
+        composeTestRule.onNodeWithContentDescription(labelAddIcon).assertIsDisplayed()
+            .assertHasClickAction()
     }
 
     @Test
     fun emptyRecordListTest() {
-        val state =  mutableStateOf(MainViewState(emptyList(), false))
+        val state = mutableStateOf(MainViewState(emptyList(), false))
         composeTestRule.setContent {
             TaxresidentTheme {
                 HomeScreen(state = state, callbacks = HomeScreenCallbacks({}, {}, {}, {}, {}, {}))
@@ -68,13 +66,16 @@ class ScreensTest {
 
     @Test
     fun recordListTest() {
-        val state =  mutableStateOf(MainViewState(
-            listOf(
-            RecordEntity(0, null, null, "jan"),
-            RecordEntity(1, null, null, "mar"),
-            RecordEntity(2, null, null, "jun")
-            ),
-            false))
+        val state = mutableStateOf(
+            MainViewState(
+                listOf(
+                    RecordEntity(0, null, null, "jan"),
+                    RecordEntity(1, null, null, "mar"),
+                    RecordEntity(2, null, null, "jun")
+                ),
+                false
+            )
+        )
         composeTestRule.setContent {
             TaxresidentTheme {
                 HomeScreen(state = state, callbacks = HomeScreenCallbacks({}, {}, {}, {}, {}, {}))
@@ -88,7 +89,7 @@ class ScreensTest {
 
     @Test
     fun showMenuFromTopAppBar() {
-        val state =  mutableStateOf(MainViewState(emptyList(), false))
+        val state = mutableStateOf(MainViewState(emptyList(), false))
         composeTestRule.setContent {
             TaxresidentTheme {
                 HomeScreen(state = state, callbacks = HomeScreenCallbacks({}, {}, {}, {}, {}, {}))
@@ -97,25 +98,4 @@ class ScreensTest {
         composeTestRule.onNodeWithContentDescription(labelMoreIcon).performClick()
         composeTestRule.onNode(hasTestTag("home popup menu") and isPopup())
     }
-
-    @Test
-    fun transitionToSearchScreen() {
-        //Todo
-    }
-
-    @Test
-    fun transitionToSettingsScreen() {
-        //Todo
-    }
-
-    @Test
-    fun transitionToAboutScreen() {
-        //Todo
-    }
-
-    @Test
-    fun transitionToRecordScreen() {
-        //Todo
-    }
-
 }

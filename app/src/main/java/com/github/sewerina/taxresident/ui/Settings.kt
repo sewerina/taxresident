@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -256,6 +257,7 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Switch(
+                    modifier = Modifier.testTag("переключатель темы"),
                     checked = darkTheme,
                     onCheckedChange = callbacks.onSwitchTheme,
                     colors = SwitchDefaults.colors(uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant)

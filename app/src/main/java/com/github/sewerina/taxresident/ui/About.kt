@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -66,6 +67,7 @@ fun HtmlText(htmlName: String, topPadding: Dp) {
 
     AndroidView(
         modifier = Modifier
+            .testTag("WebView")
             .fillMaxSize()
             .padding(
                 top = topPadding,

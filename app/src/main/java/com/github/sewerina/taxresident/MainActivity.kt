@@ -23,6 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
+            val mainViewModel: MainViewModel = viewModel()
 
             val sys = isSystemInDarkTheme()
             val darkThemeState = rememberSaveable {
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
             )
 
             TaxresidentTheme(darkTheme = darkThemeState.value, dynamicColor = false) {
-                TaxResidentApp(darkThemeState.value, settingsScreenCallbacks)
+                TaxResidentApp(mainViewModel, darkThemeState.value, settingsScreenCallbacks)
             }
         }
     }

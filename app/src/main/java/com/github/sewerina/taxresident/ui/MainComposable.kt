@@ -4,7 +4,6 @@ import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,10 +16,11 @@ import com.github.sewerina.taxresident.R
 import com.github.sewerina.taxresident.data.RecordEntity
 
 @Composable
-fun TaxResidentApp(darkTheme: Boolean, settingsScreenCallbacks: SettingsScreenCallbacks) {
+fun TaxResidentApp(mainViewModel: MainViewModel, darkTheme: Boolean, settingsScreenCallbacks: SettingsScreenCallbacks) {
     val navController = rememberNavController()
     settingsScreenCallbacks.onBack = { navController.popBackStack() }
     TaxResidentNavHost(
+        mainViewModel = mainViewModel,
         darkTheme = darkTheme,
         settingsScreenCallbacks = settingsScreenCallbacks,
         navController = navController
@@ -29,12 +29,12 @@ fun TaxResidentApp(darkTheme: Boolean, settingsScreenCallbacks: SettingsScreenCa
 
 @Composable
 fun TaxResidentNavHost(
+    mainViewModel: MainViewModel,
     darkTheme: Boolean,
     settingsScreenCallbacks: SettingsScreenCallbacks,
     navController: NavHostController
 ) {
-    val vm: MainViewModel = viewModel()
-    val state = vm.mainViewState.observeAsState(initial = MainViewState.initial)
+    val state = mainViewModel.mainViewState.observeAsState(initial = MainViewState.initial)
 
     NavHost(navController = navController, startDestination = Nav.splash) {
         composable(Nav.splash) {
@@ -58,16 +58,16 @@ fun TaxResidentNavHost(
                 HomeScreenCallbacks(
                     onNewRecord = { navController.toRecord() },
                     onEdit = { recordId -> navController.toRecordById(recordId) },
-                    onRemove = { record -> vm.delete(record) },
+                    onRemove = { record -> mainViewModel.delete(record) },
                     onSearch = { navController.toSearch() },
                     onSettings = { navController.toSettings() },
                     onAbout = { navController.toAbout() })
             )
         }
         composable(Nav.search) {
-            SearchScreen(vm, SearchScreenCallbacks(
+            SearchScreen(mainViewModel, SearchScreenCallbacks(
                 onEdit = { recordId -> navController.toRecordById(recordId) },
-                onRemove = { record -> vm.delete(record) },
+                onRemove = { record -> mainViewModel.delete(record) },
                 onBack = { navController.popBackStack() }
             ))
         }
@@ -89,7 +89,7 @@ fun TaxResidentNavHost(
                 callbacks = RecordScreenCallbacks(
                     onBack = { navController.popBackStack() },
                     onSave = { entity ->
-                        vm.save(entity)
+                        mainViewModel.save(entity)
                         navController.popBackStack()
                     },
                     onDelete = { }
@@ -103,18 +103,18 @@ fun TaxResidentNavHost(
             // click on the interest record in the list
             val recordId = it.arguments?.getInt("recordId")
             val record =
-                if (recordId == null) RecordEntity(0, null, null, "") else vm.getRecord(recordId)
+                if (recordId == null) RecordEntity(0, null, null, "") else mainViewModel.getRecord(recordId)
             RecordScreen(
                 record,
                 list = state.value.list,
                 callbacks = RecordScreenCallbacks(
                     onBack = { navController.popBackStack() },
                     onSave = { entity ->
-                        vm.save(entity)
+                        mainViewModel.save(entity)
                         navController.popBackStack()
                     },
                     onDelete = { entity ->
-                        vm.delete(entity)
+                        mainViewModel.delete(entity)
                         navController.popBackStack()
                     }
                 )
@@ -123,7 +123,7 @@ fun TaxResidentNavHost(
     }
 
     LaunchedEffect(key1 = Unit) {
-        vm.load()
+        mainViewModel.load()
     }
 }
 
