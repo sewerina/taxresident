@@ -38,10 +38,6 @@ class TransitionsTest {
         recordDao = roomDb.recordDao()
         suggestionDao = roomDb.suggestionDao()
         mainViewModel = MainViewModel(recordDao, suggestionDao)
-    }
-
-    @Test
-    fun transitionToSearchScreen() {
         composeTestRule.setContent {
             TaxresidentTheme(darkTheme = true, dynamicColor = false) {
                 TaxResidentApp(
@@ -51,6 +47,10 @@ class TransitionsTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun transitionToSearchScreen() {
         composeTestRule.waitUntilAtLeastOneExists(hasContentDescription(HomeScreenTest.labelSearchIcon))
         composeTestRule.onNodeWithContentDescription(HomeScreenTest.labelSearchIcon).performClick()
 
@@ -60,15 +60,6 @@ class TransitionsTest {
 
     @Test
     fun transitionToSettingsScreen() {
-        composeTestRule.setContent {
-            TaxresidentTheme(darkTheme = true, dynamicColor = false) {
-                TaxResidentApp(
-                    mainViewModel,
-                    true,
-                    settingsScreenCallbacks = SettingsScreenCallbacks({}, {}, { "User" }, {})
-                )
-            }
-        }
         composeTestRule.waitUntilAtLeastOneExists(hasContentDescription(HomeScreenTest.labelMoreIcon))
         composeTestRule.onNodeWithContentDescription(HomeScreenTest.labelMoreIcon).performClick()
         composeTestRule.onNode(hasText(composeTestRule.activity.getString(R.string.menuItem_settings)))
@@ -80,15 +71,6 @@ class TransitionsTest {
 
     @Test
     fun transitionToAboutScreen() {
-        composeTestRule.setContent {
-            TaxresidentTheme(darkTheme = true, dynamicColor = false) {
-                TaxResidentApp(
-                    mainViewModel,
-                    true,
-                    settingsScreenCallbacks = SettingsScreenCallbacks({}, {}, { "User" }, {})
-                )
-            }
-        }
         composeTestRule.waitUntilAtLeastOneExists(hasContentDescription(HomeScreenTest.labelMoreIcon))
         composeTestRule.onNodeWithContentDescription(HomeScreenTest.labelMoreIcon).performClick()
         composeTestRule.onNode(hasText(composeTestRule.activity.getString(R.string.menuItem_about)))
@@ -99,16 +81,7 @@ class TransitionsTest {
 
     @Test
     fun transitionToRecordScreen() {
-        composeTestRule.setContent {
-            TaxresidentTheme(darkTheme = true, dynamicColor = false) {
-                TaxResidentApp(
-                    mainViewModel,
-                    true,
-                    settingsScreenCallbacks = SettingsScreenCallbacks({}, {}, { "User" }, {})
-                )
-            }
-        }
-        composeTestRule.waitUntilAtLeastOneExists(hasContentDescription(HomeScreenTest.labelAddIcon))
+        composeTestRule.waitUntilAtLeastOneExists(hasContentDescription(HomeScreenTest.labelAddIcon), 1500)
         composeTestRule.onNodeWithContentDescription(HomeScreenTest.labelAddIcon).performClick()
 
         composeTestRule.onNode(hasText(composeTestRule.activity.getString(R.string.title_record)))
