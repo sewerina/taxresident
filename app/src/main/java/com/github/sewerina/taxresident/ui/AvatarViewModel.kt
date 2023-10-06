@@ -12,7 +12,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -36,14 +38,20 @@ class AvatarViewModel @Inject constructor(application: Application) :
 
     fun loadAvatar() {
         viewModelScope.launch {
-            val bitmap = BitmapFactory.decodeFile(file.path)
+            val bitmap = withContext(Dispatchers.IO) {
+                BitmapFactory.decodeFile(file.path)
+            }
             _avatarBitmap.postValue(bitmap)
         }
     }
 
     fun updateAvatar(inputUri: Uri?) {
+        if (inputUri == null) {
+            return
+        }
+
         viewModelScope.launch {
-            if (inputUri != null) {
+            val bitmap = withContext(Dispatchers.IO) {
                 val input = context.contentResolver.openInputStream(inputUri)
                 val output = context.contentResolver.openOutputStream(avatarUri)
                 val content = input!!.readBytes()
@@ -51,10 +59,10 @@ class AvatarViewModel @Inject constructor(application: Application) :
                 output.flush()
                 output.close()
                 input.close()
-
-                val bitmap = BitmapFactory.decodeFile(file.path)
-                _avatarBitmap.postValue(bitmap)
+                BitmapFactory.decodeFile(file.path)
             }
+
+            _avatarBitmap.postValue(bitmap)
         }
     }
 }
